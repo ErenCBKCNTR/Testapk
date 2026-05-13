@@ -12,6 +12,46 @@ export default function App() {
   const [packageName, setPackageName] = useState('com.prusoft.blindsocial');
   const [snippet, setSnippet] = useState('DIWT46TKZTZGOAAAAAAAAAAAAAA');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showYaml, setShowYaml] = useState(false);
+
+  const buildYmlContent = `name: Build Release APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build and Sign APK
+        run: gradle assembleRelease
+        env:
+          KEYSTORE_PASSWORD: \${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: \${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: \${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: app/build/outputs/apk/release/app-release.apk`;
 
   const generateZip = async () => {
     setIsGenerating(true);
@@ -267,15 +307,31 @@ dependencies {
           <ol className="list-decimal list-inside space-y-1.5 text-blue-800/80 ml-1">
             <li>Yukarıdaki butona tıklayıp <strong>ZIP</strong> dosyasını bilgisayarınıza indirin.</li>
             <li>İndirdiğiniz dosyaları klasöre çıkartın ve yeni bir <strong>GitHub Repository</strong>'sine yükleyin (Push yapın).</li>
+            <li className="text-red-600 font-medium bg-red-50 p-1 rounded">ÖNEMLİ: Klasörün içindeki <code className="bg-red-100 px-1 rounded">.github</code> klasörü (başında nokta var) gizli klasör olabilir. Lütfen GitHub'a dosyaları atarken bu klasörün de (içindeki workflows/build.yml dahil) aktarıldığından emin olun.</li>
             <li>GitHub'da deponuzun <strong>Settings &gt; Secrets and variables &gt; Actions</strong> bölümüne gidin.</li>
             <li>Şu üç <strong>Repository secret</strong>'ı oluşturun:
-              <ul className="list-disc list-inside ml-5 mt-1 text-xs">
+              <ul className="list-disc list-inside ml-5 mt-1 text-xs text-blue-800">
                 <li><code>KEYSTORE_PASSWORD</code>: JKS dosyanızın şifresi</li>
                 <li><code>KEY_ALIAS</code>: JKS dosyanızdaki alias adı</li>
                 <li><code>KEY_PASSWORD</code>: Alias şifresi</li>
               </ul>
             </li>
             <li>GitHub <strong>Actions</strong> sekmesine gidin. Sol menüden <strong>Build Release APK</strong> workflow'una tıklayın.</li>
+            <li>Eğer Actions sekmesi boşsa, kodu yüklerken <code>.github</code> klasörünü yükleyememişsiniz demektir. GitHub üzerinden doğrudan "Add file &gt; Create new file" diyerek <code>.github/workflows/build.yml</code> dosyasını oluşturabilirsiniz. 
+              {!showYaml ? (
+                <button onClick={() => setShowYaml(true)} className="ml-2 text-blue-600 underline text-sm">Dosya içeriğini göster</button>
+              ) : (
+                <div className="mt-2 w-full max-w-full relative">
+                  <div className="flex justify-between items-center bg-gray-800 text-gray-200 px-3 py-1.5 rounded-t-lg text-xs">
+                    <span>build.yml</span>
+                    <button onClick={() => { navigator.clipboard.writeText(buildYmlContent); alert("Kopyalandı!"); }} className="text-blue-300 hover:text-white">Kopyala</button>
+                  </div>
+                  <pre className="bg-gray-900 text-gray-100 p-3 rounded-b-lg overflow-x-auto text-xs">
+                    <code>{buildYmlContent}</code>
+                  </pre>
+                </div>
+              )}
+            </li>
             <li>Sağ tarafta beliren <strong>Run workflow</strong> ikonuna (veya butonuna) tıklayarak işlemi başlatın.</li>
             <li>İşlem bitince oluşturulan imzalı <strong>APK</strong>'yı sayfanın altındaki <strong>Artifacts</strong> kısmından indirip Play Console'a yükleyin.</li>
           </ol>
