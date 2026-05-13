@@ -104,6 +104,7 @@ on:
   push:
     branches:
       - main
+      - master
   workflow_dispatch:
 
 jobs:
@@ -274,8 +275,9 @@ dependencies {
                 <li><code>KEY_PASSWORD</code>: Alias şifresi</li>
               </ul>
             </li>
-            <li>GitHub <strong>Actions</strong> sekmesine gidin, <strong>Build Release APK</strong> workflow'unu çalıştırın.</li>
-            <li>İşlem bitince oluşturulan imzalı <strong>APK</strong>'yı indirip Play Console'a yükleyin.</li>
+            <li>GitHub <strong>Actions</strong> sekmesine gidin. Sol menüden <strong>Build Release APK</strong> workflow'una tıklayın.</li>
+            <li>Sağ tarafta beliren <strong>Run workflow</strong> ikonuna (veya butonuna) tıklayarak işlemi başlatın.</li>
+            <li>İşlem bitince oluşturulan imzalı <strong>APK</strong>'yı sayfanın altındaki <strong>Artifacts</strong> kısmından indirip Play Console'a yükleyin.</li>
           </ol>
         </div>
       </div>
